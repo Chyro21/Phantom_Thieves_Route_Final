@@ -1,0 +1,116 @@
+Project phantom_thieves_route {
+  database_type: 'PostgreSQL'
+  Note: 'ERD Phantom Thieves Route. Tempel ke dbdiagram.io untuk membuat diagram.'
+}
+
+Table game_dates {
+  game_date_id bigint [pk, increment]
+  game_date date [not null, unique]
+  weekday varchar(10) [not null]
+  notes text
+}
+Table activities {
+  activity_id bigint [pk, increment]
+  activity_name varchar(100) [not null, unique]
+  category varchar(50) [not null]
+  description text
+}
+Table calendar_activities {
+  calendar_activity_id bigint [pk, increment]
+  game_date_id bigint [not null, ref: > game_dates.game_date_id]
+  activity_id bigint [not null, ref: > activities.activity_id]
+  session varchar(20) [not null]
+  condition_name varchar(100) [not null]
+  knowledge_gain int [not null]
+  proficiency_gain int [not null]
+  guts_gain int [not null]
+  kindness_gain int [not null]
+  charm_gain int [not null]
+  notes text
+}
+Table player_profiles {
+  player_id bigint [pk, increment]
+  player_name varchar(100) [not null]
+  current_game_date_id bigint [ref: > game_dates.game_date_id]
+  knowledge smallint [not null]
+  proficiency smallint [not null]
+  guts smallint [not null]
+  kindness smallint [not null]
+  charm smallint [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+Table confidants {
+  confidant_id bigint [pk, increment]
+  confidant_name varchar(100) [not null, unique]
+  arcana varchar(50)
+  notes text
+}
+Table player_confidant_ranks {
+  player_id bigint [pk, ref: > player_profiles.player_id]
+  confidant_id bigint [pk, ref: > confidants.confidant_id]
+  current_rank smallint [not null]
+  updated_at timestamptz [not null]
+}
+Table confidant_interactions {
+  interaction_id bigint [pk, increment]
+  confidant_id bigint [not null, ref: > confidants.confidant_id]
+  rank_target smallint [not null]
+  interaction_description text [not null]
+  answer_text text [not null]
+  affection_points smallint [not null]
+  is_spoiler boolean [not null]
+}
+Table qa_entries {
+  qa_id bigint [pk, increment]
+  game_date_id bigint [ref: > game_dates.game_date_id]
+  question_type varchar(20) [not null]
+  question_text text [not null]
+  answer_text text [not null]
+  explanation text
+  is_spoiler boolean [not null]
+}
+Table personas {
+  persona_id bigint [pk, increment]
+  persona_name varchar(100) [not null, unique]
+  level smallint [not null]
+  arcana varchar(50)
+  notes text
+}
+Table fusion_recipes {
+  recipe_id bigint [pk, increment]
+  target_persona_id bigint [not null, ref: > personas.persona_id]
+  recipe_name varchar(100)
+  source_name varchar(150)
+  notes text
+}
+Table fusion_recipe_materials {
+  recipe_id bigint [pk, ref: > fusion_recipes.recipe_id]
+  material_slot smallint [pk]
+  persona_id bigint [not null, ref: > personas.persona_id]
+}
+Table bosses {
+  boss_id bigint [pk, increment]
+  boss_name varchar(150) [not null, unique]
+  first_available_date_id bigint [ref: > game_dates.game_date_id]
+  last_available_date_id bigint [ref: > game_dates.game_date_id]
+  is_optional boolean [not null]
+  description text
+  is_spoiler boolean [not null]
+}
+Table boss_affinities {
+  affinity_id bigint [pk, increment]
+  boss_id bigint [not null, ref: > bosses.boss_id]
+  element varchar(30) [not null]
+  affinity_type varchar(20) [not null]
+  notes text
+}
+Table party_members {
+  party_member_id bigint [pk, increment]
+  member_name varchar(100) [not null, unique]
+}
+Table recommended_party_members {
+  boss_id bigint [pk, ref: > bosses.boss_id]
+  party_member_id bigint [pk, ref: > party_members.party_member_id]
+  recommendation_notes text
+}

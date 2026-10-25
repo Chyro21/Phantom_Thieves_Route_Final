@@ -1,0 +1,52 @@
+{
+  "info": {
+    "_postman_id": "e9e0a0e7-fbe2-4c3e-b4a6-93a17f9b12ab",
+    "name": "Phantom Thieves Route API",
+    "description": "Collection untuk pengujian REST API Phantom Thieves Route. Ganti baseUrl ke URL Vercel setelah deployment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "activityId", "value": "1" },
+    { "key": "gameDate", "value": "2026-04-11" }
+  ],
+  "item": [
+    { "name": "Health check", "request": { "method": "GET", "url": "{{baseUrl}}/api/health" } },
+    { "name": "List activities", "request": { "method": "GET", "url": "{{baseUrl}}/api/activities" } },
+    { "name": "Activity detail", "request": { "method": "GET", "url": "{{baseUrl}}/api/activities/{{activityId}}" } },
+    {
+      "name": "Create activity",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"activity_name\": \"Test Activity\",\n  \"category\": \"Study\",\n  \"description\": \"Aktivitas untuk pengujian API\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/activities"
+      }
+    },
+    {
+      "name": "Replace activity (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"activity_name\": \"Test Activity Updated\",\n  \"category\": \"Study\",\n  \"description\": \"Data setelah PUT\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/activities/{{activityId}}"
+      }
+    },
+    {
+      "name": "Patch activity",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"description\": \"Deskripsi diubah melalui PATCH\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/activities/{{activityId}}"
+      }
+    },
+    { "name": "Delete activity", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/activities/{{activityId}}" } },
+    { "name": "Calendar by date", "request": { "method": "GET", "url": "{{baseUrl}}/api/calendar?date={{gameDate}}" } },
+    { "name": "List confidants", "request": { "method": "GET", "url": "{{baseUrl}}/api/confidants" } },
+    { "name": "List personas", "request": { "method": "GET", "url": "{{baseUrl}}/api/personas" } },
+    { "name": "List bosses (spoilers hidden)", "request": { "method": "GET", "url": "{{baseUrl}}/api/bosses?date={{gameDate}}" } },
+    { "name": "List bosses (reveal after confirmation)", "request": { "method": "GET", "url": "{{baseUrl}}/api/bosses?date={{gameDate}}&reveal=true" } },
+    { "name": "List player profiles", "request": { "method": "GET", "url": "{{baseUrl}}/api/profiles" } }
+  ]
+}
