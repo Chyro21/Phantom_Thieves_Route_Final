@@ -1,170 +1,177 @@
-# Phantom Thieves Route — REST API
+# Phantom Thieves Route
 
-REST API backend untuk proyek Persona 5 Royal **Phantom Thieves Route**. Dibangun dengan Python Flask dan PostgreSQL (Supabase/Neon). API berfokus pada modul kalender aktivitas, Confidant, Persona, profil pemain, dan database boss dengan penanda spoiler.
+Phantom Thieves Route adalah proyek REST API berbasis Python yang dirancang untuk membantu pemain _Persona 5 Royal_ mengakses informasi permainan, termasuk aktivitas harian, Confidant, Persona, dan kalender dalam game.
 
-> **Status deployment:** paket ini sudah dikonfigurasi untuk Vercel, tetapi URL publik belum tersedia karena deployment membutuhkan akun GitHub/Vercel dan connection string database milik pemilik proyek. Jangan mencantumkan URL palsu sebagai deployment yang sudah live.
+Proyek ini dikembangkan sebagai proyek pembelajaran Backend Development dengan menggunakan Python, Flask, PostgreSQL, dan deployment melalui Vercel.
 
-## Teknologi
-- Python + Flask
-- PostgreSQL melalui `psycopg2`
-- Vercel Serverless Functions
-- Supabase atau Neon sebagai database online
-- Postman / Thunder Client untuk pengujian
+## Informasi Proyek
 
-## Struktur berkas
-- `app.py` — endpoint REST API.
-- `api/index.py`, `vercel.json` — entrypoint dan routing Vercel.
-- `sql/schema.sql` — 15 tabel relasional.
-- `sql/dummy_data.sql` — data contoh untuk pengujian.
-- `ERD_Phantom_Thieves_Route.png` — gambar ringkasan ERD untuk dokumentasi.
-- `sql/schema.dbml` — definisi ERD yang bisa diimpor ke dbdiagram.io untuk tampilan detail.
-- `postman_collection.json` — koleksi request untuk diimpor ke Postman.
-- `.env.example` — contoh environment variable, bukan credential asli.
+- **Nama:** Phantom Thieves Route
+- **Bahasa pemrograman:** Python
+- **Framework:** Flask
+- **Database:** PostgreSQL
+- **Database hosting:** Supabase
+- **Deployment:** Vercel
+- **Format respons:** JSON
 
-## Database dan ERD
-1. Buat database PostgreSQL pada Supabase atau Neon.
-2. Jalankan seluruh isi `sql/schema.sql` di SQL Editor. Script membuat schema `phantom_route` dan 15 tabel dengan primary key, foreign key, constraint, dan indeks.
-3. Jalankan `sql/dummy_data.sql` untuk memasukkan data uji. Data ini hanya contoh dan **bukan** kumpulan data lengkap Persona 5 Royal.
-4. Gambar ringkasan ERD sudah disertakan sebagai `ERD_Phantom_Thieves_Route.png`. Untuk diagram detail yang dapat diedit, buka https://dbdiagram.io, buat diagram baru, lalu tempel isi `sql/schema.dbml`.
+## Deployment
 
-Relasi utama:
-- `game_dates` 1:N `calendar_activities`.
-- `activities` 1:N `calendar_activities`.
-- `player_profiles` N:N `confidants` melalui `player_confidant_ranks`.
-- `confidants` 1:N `confidant_interactions`.
-- `personas` 1:N `fusion_recipes` sebagai Persona target.
-- `fusion_recipes` N:N `personas` melalui `fusion_recipe_materials`.
-- `bosses` 1:N `boss_affinities`.
-- `bosses` N:N `party_members` melalui `recommended_party_members`.
+Base URL API:
 
-## Menjalankan secara lokal
-1. Gunakan Python 3.10 atau lebih baru.
-2. Buat virtual environment dan instal paket:
+https://phantom-thieves-route-final.vercel.app/
+
+Dokumentasi API:
+
+https://phantom-thieves-route-final.vercel.app/api/docs
+
+## Fitur API
+
+### 1. Health Check
+
+Memeriksa status aplikasi dan koneksi database.
+
+**Request**
+
+`GET /api/health`
+
+**Contoh respons**
+
+```json
+{
+  "database": "postgres",
+  "server_time": "2026-10-25T14:39:52.499537+00:00",
+  "status": "ok"
+}
+```
+
+### 2. Activities
+
+Mengambil dan mengelola data aktivitas.
+
+| Method | Endpoint               | Fungsi                     |
+| ------ | ---------------------- | -------------------------- |
+| GET    | `/api/activities`      | Mengambil daftar aktivitas |
+| POST   | `/api/activities`      | Menambahkan aktivitas      |
+| PATCH  | `/api/activities/{id}` | Memperbarui aktivitas      |
+| DELETE | `/api/activities/{id}` | Menghapus aktivitas        |
+
+Contoh request POST:
+
+```json
+{
+  "activity_name": "Study at Cafe",
+  "category": "Social Stat",
+  "description": "Aktivitas belajar."
+}
+```
+
+### 3. Confidants
+
+Mengambil data karakter Confidant.
+
+`GET /api/confidants`
+
+Data yang dikembalikan mencakup ID Confidant, nama karakter, Arcana, dan catatan.
+
+### 4. Personas
+
+Mengambil data Persona.
+
+`GET /api/personas`
+
+Data yang dikembalikan mencakup ID Persona, nama, Arcana, level, dan catatan.
+
+### 5. Calendar
+
+Mengambil informasi aktivitas berdasarkan tanggal dalam game.
+
+`GET /api/calendar?date=2026-04-11`
+
+Parameter:
+
+- `date`: tanggal dalam format `YYYY-MM-DD`.
+
+Informasi yang dapat ditampilkan mencakup tanggal, hari, sesi aktivitas, nama aktivitas, kategori, serta nilai perubahan social stats.
+
+Pada hari Minggu, sesi kalender menggunakan Morning dan Evening, sesuai hasil pengujian yang dilakukan.
+
+## Pengujian API
+
+Pengujian dilakukan menggunakan Thunder Client di Visual Studio Code terhadap URL deployment Vercel.
+
+| Pengujian                              | Hasil                  |
+| -------------------------------------- | ---------------------- |
+| GET `/api/health`                      | Berhasil               |
+| GET `/api/activities`                  | Berhasil               |
+| POST `/api/activities`                 | Berhasil               |
+| GET `/api/activities` setelah POST     | Berhasil               |
+| PATCH `/api/activities/7`              | Berhasil               |
+| DELETE `/api/activities/7`             | Berhasil               |
+| GET `/api/activities/7` setelah DELETE | Mengembalikan HTTP 404 |
+| GET `/api/confidants`                  | Berhasil               |
+| GET `/api/personas`                    | Berhasil               |
+| GET `/api/calendar?date=2026-04-11`    | Berhasil               |
+| GET `/api/calendar?date=2026-04-12`    | Berhasil               |
+
+## Menjalankan Proyek Secara Lokal
+
+### Prasyarat
+
+- Python
+- pip
+- Git
+- Akun Supabase dengan database PostgreSQL
+- Visual Studio Code atau editor kode lainnya
+
+### Instalasi
+
+1. Clone repository:
+
+   ```bash
+   git clone https://github.com/Chyro21/Phantom_Thieves_Route_Final.git
+   ```
+
+2. Masuk ke folder proyek:
+
+   ```bash
+   cd Phantom_Thieves_Route_Final
+   ```
+
+3. Buat virtual environment:
+
    ```bash
    python -m venv .venv
-   # Windows PowerShell:
+   ```
+
+4. Aktifkan virtual environment di Windows PowerShell:
+
+   ```powershell
    .venv\Scripts\Activate.ps1
-   # macOS/Linux:
-   source .venv/bin/activate
+   ```
+
+5. Instal dependensi:
+
+   ```bash
    pip install -r requirements.txt
    ```
-3. Atur `DATABASE_URL` dari database PostgreSQL. Jangan masukkan password asli ke GitHub.
-   - Windows PowerShell: `$env:DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"`
-   - macOS/Linux: `export DATABASE_URL='postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require'`
-4. Jalankan API:
-   ```bash
-   python app.py
-   ```
-5. Buka `http://127.0.0.1:5000/` atau `/api/health`.
 
-## Deployment Vercel
-1. Push folder proyek ini ke repository GitHub baru. Pastikan `.env` tidak ikut di-commit.
-2. Di Vercel, pilih **Add New → Project** lalu impor repository tersebut.
-3. Di Project Settings → Environment Variables, tambahkan `DATABASE_URL` berisi connection string PostgreSQL online. Gunakan connection string dengan SSL sesuai penyedia database.
-4. Deploy. Jika mengubah environment variable, lakukan redeploy.
-5. Uji `https://<nama-proyek>.vercel.app/api/health`. Deployment baru dapat dianggap selesai setelah URL tersebut merespons `{"status":"ok", ...}`.
-6. Ganti variabel `baseUrl` dalam koleksi Postman dari `http://localhost:5000` ke URL Vercel.
+6. Siapkan variabel lingkungan `DATABASE_URL` menggunakan connection string PostgreSQL milikmu. Jangan mengunggah file `.env` atau membagikan password database.
 
-## Endpoint API
-Semua response menggunakan JSON. Header untuk request dengan body: `Content-Type: application/json`.
+7. Jalankan aplikasi sesuai entry point lokal yang tersedia di repository.
 
-### 1. Health check
-- Method: `GET`
-- URL: `/api/health`
-- Deskripsi: memeriksa koneksi database.
-- Response sukses (200): `{"status":"ok","database":"...","server_time":"..."}`
-- Response error (503): `{"error":"Database tidak dapat dihubungi..."}`
+## Teknologi
 
-### 2. Daftar aktivitas
-- Method: `GET`
-- URL: `/api/activities`
-- Deskripsi: mengambil semua aktivitas. Filter opsional `?category=Study`.
-- Response sukses (200): `{"data":[{"activity_id":1,"activity_name":"Study","category":"Study","description":"..."}],"count":1}`
+- Python
+- Flask
+- PostgreSQL
+- Supabase
+- Vercel
+- Thunder Client
 
-### 3. Detail aktivitas
-- Method: `GET`
-- URL: `/api/activities/1`
-- Deskripsi: mengambil satu aktivitas.
-- Response sukses (200): `{"data":{"activity_id":1,"activity_name":"Study","category":"Study","description":"..."}}`
-- Response error (404): `{"error":"Aktivitas tidak ditemukan."}`
+## Catatan Pengembangan
 
-### 4. Tambah aktivitas
-- Method: `POST`
-- URL: `/api/activities`
-- Deskripsi: membuat aktivitas baru.
-- Request body:
-  ```json
-  {"activity_name":"Study at Library","category":"Study","description":"Belajar untuk meningkatkan Knowledge"}
-  ```
-- Response sukses (201): `{"message":"Aktivitas berhasil ditambahkan.","data":{"activity_id":1,"activity_name":"Study at Library","category":"Study","description":"..."}}`
-- Response error (400): `{"error":"Field activity_name wajib diisi dengan teks."}`
-- Response error (409): nama aktivitas duplikat.
+Sebagian data yang digunakan dalam pengujian masih berupa data contoh (_dummy_). Pengembangan berikutnya mencakup penyempurnaan data game, integrasi tracker, kalkulator fusion Persona, serta database boss dengan perlindungan spoiler.
 
-### 5. Ganti aktivitas
-- Method: `PUT`
-- URL: `/api/activities/1`
-- Deskripsi: mengganti field utama aktivitas; `activity_name` dan `category` wajib disertakan.
-- Request body:
-  ```json
-  {"activity_name":"Study at School","category":"Study","description":"Belajar di sekolah"}
-  ```
-- Response sukses (200): `{"message":"Aktivitas berhasil diperbarui.","data":{...}}`
-- Response error (400/404): body tidak valid atau aktivitas tidak ditemukan.
+## Repository
 
-### 6. Ubah sebagian aktivitas
-- Method: `PATCH`
-- URL: `/api/activities/1`
-- Deskripsi: memperbarui satu atau beberapa field aktivitas.
-- Request body: `{"description":"Belajar saat hujan"}`
-- Response sukses (200): `{"message":"Aktivitas berhasil diperbarui.","data":{...}}`
-- Response error (404): aktivitas tidak ditemukan.
-
-### 7. Hapus aktivitas
-- Method: `DELETE`
-- URL: `/api/activities/1`
-- Deskripsi: menghapus aktivitas yang tidak sedang digunakan kalender.
-- Response sukses (200): `{"message":"Aktivitas berhasil dihapus.","data":{"activity_id":1,"activity_name":"..."}}`
-- Response error (404): aktivitas tidak ditemukan.
-- Response error (409): aktivitas masih direferensikan kalender.
-
-### 8. Kalender berdasarkan tanggal
-- Method: `GET`
-- URL: `/api/calendar?date=2026-04-11`
-- Deskripsi: mengambil sesi dan aktivitas untuk tanggal tertentu.
-- Response sukses (200): objek berisi `date`, `weekday`, dan `data` aktivitas.
-- Response error (400): tanggal tidak diisi atau format salah.
-- Response error (404): tanggal belum tersedia di data kalender.
-
-### 9. Daftar Confidant
-- Method: `GET`
-- URL: `/api/confidants`
-- Deskripsi: mengambil daftar Confidant.
-- Response sukses (200): `{"data":[...],"count":0}`
-
-### 10. Daftar Persona
-- Method: `GET`
-- URL: `/api/personas`
-- Deskripsi: mengambil daftar Persona untuk mendukung modul fusion.
-- Response sukses (200): `{"data":[...],"count":0}`
-
-### 11. Daftar boss
-- Method: `GET`
-- URL: `/api/bosses?date=2026-04-11`
-- Deskripsi: mengambil boss yang rentang tanggal ketersediaannya mencakup tanggal yang diminta. Deskripsi bertanda spoiler disembunyikan secara default.
-- Untuk mengungkap deskripsi setelah meminta konfirmasi pengguna, gunakan `/api/bosses?date=2026-04-11&reveal=true`.
-- Response sukses (200): `{"date":"2026-04-11","data":[...],"count":0,"spoilers_revealed":false}`
-- Response error (400): parameter `date` wajib diisi; response 404 jika tanggal tidak ada di tabel kalender. Boss yang belum diisi tanggal ketersediaannya tetap dapat muncul, jadi data tanggal harus diisi dengan benar untuk mengaktifkan pembatasan progres.
-
-### 12. Daftar profil pemain
-- Method: `GET`
-- URL: `/api/profiles`
-- Deskripsi: mengambil profil dan statistik pemain.
-- Response sukses (200): `{"data":[...],"count":0}`
-
-## Pengujian Postman / Thunder Client
-Impor `postman_collection.json` ke Postman. Mulai dari health check, kemudian uji endpoint aktivitas dengan GET, POST, PUT, PATCH, dan DELETE. Untuk request yang mengubah data, pastikan database uji telah disiapkan. Setelah deployment, ganti `baseUrl` ke URL Vercel dan lakukan ulang semua tes. Simpan screenshot atau ekspor hasil pengujian setelah endpoint diuji pada URL publik.
-
-## Batasan yang perlu diketahui
-- Data dummy hanya digunakan untuk pengujian struktur dan endpoint.
-- Aplikasi tidak mengklaim telah live sampai dideploy ke akun Vercel pemilik proyek.
-- `reveal=true` adalah parameter untuk mengungkap data bertanda spoiler; frontend idealnya menampilkan konfirmasi terlebih dahulu. Penegakan progres tanggal untuk boss dan kelengkapan data game adalah pengembangan lanjutan.
+https://github.com/Chyro21/Phantom_Thieves_Route_Final
