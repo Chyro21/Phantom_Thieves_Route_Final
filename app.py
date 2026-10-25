@@ -1,10 +1,14 @@
 """Phantom Thieves Route REST API — Flask + PostgreSQL (Supabase/Neon)."""
+
 import os
 from datetime import date
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2 import IntegrityError, Error
+
+load_dotenv()
 
 app = Flask(__name__)
 SCHEMA = "phantom_route"
@@ -81,24 +85,80 @@ def health():
         return error("Database tidak dapat dihubungi. Periksa DATABASE_URL dan status database.", 503)
 
 
+
 @app.get("/api/docs")
-def docs():
+def api_docs():
     return jsonify({
         "base_url": request.host_url.rstrip("/"),
         "endpoints": [
-            {"method": "GET", "path": "/api/health", "description": "Memeriksa koneksi database"},
-            {"method": "GET", "path": "/api/activities", "description": "Daftar aktivitas; query ?category=Study opsional"},
-            {"method": "GET", "path": "/api/activities/<id>", "description": "Detail aktivitas"},
-            {"method": "POST", "path": "/api/activities", "description": "Tambah aktivitas"},
-            {"method": "PUT/PATCH", "path": "/api/activities/<id>", "description": "Ubah aktivitas"},
-            {"method": "DELETE", "path": "/api/activities/<id>", "description": "Hapus aktivitas"},
-            {"method": "GET", "path": "/api/calendar?date=YYYY-MM-DD", "description": "Aktivitas kalender berdasarkan tanggal"},
-            {"method": "GET", "path": "/api/confidants", "description": "Daftar Confidant"},
-            {"method": "GET", "path": "/api/personas", "description": "Daftar Persona"},
-            {"method": "GET", "path": "/api/bosses?date=YYYY-MM-DD", "description": "Daftar boss yang tersedia pada tanggal tersebut; spoiler tersembunyi secara default"},
-            {"method": "GET", "path": "/api/profiles", "description": "Daftar profil pemain"}
+            {
+                "method": "GET",
+                "path": "/api/health",
+                "description": "Memeriksa koneksi database"
+            },
+            {
+                "method": "GET",
+                "path": "/api/activities",
+                "description": "Daftar aktivitas; query ?category=Study opsional"
+            },
+            {
+                "method": "GET",
+                "path": "/api/activities/<id>",
+                "description": "Detail aktivitas"
+            },
+            {
+                "method": "POST",
+                "path": "/api/activities",
+                "description": "Tambah aktivitas"
+            },
+            {
+                "method": "PUT/PATCH",
+                "path": "/api/activities/<id>",
+                "description": "Ubah aktivitas"
+            },
+            {
+                "method": "DELETE",
+                "path": "/api/activities/<id>",
+                "description": "Hapus aktivitas"
+            },
+            {
+                "method": "GET",
+                "path": "/api/calendar?date=YYYY-MM-DD",
+                "description": "Aktivitas kalender berdasarkan tanggal"
+            },
+            {
+                "method": "GET",
+                "path": "/api/confidants",
+                "description": "Daftar Confidant"
+            },
+            {
+                "method": "GET",
+                "path": "/api/personas",
+                "description": "Daftar Persona"
+            },
+            {
+                "method": "GET",
+                "path": "/api/bosses?date=YYYY-MM-DD",
+                "description": "Daftar boss berdasarkan tanggal; spoiler tersembunyi secara default"
+            },
+            {
+                "method": "GET",
+                "path": "/api/profiles",
+                "description": "Daftar profil pemain"
+            },
+            {
+                "method": "GET",
+                "path": "/api/qa",
+                "description": "Daftar pertanyaan dan jawaban; spoiler tersembunyi secara default. Gunakan ?reveal=true untuk menampilkan jawaban"
+            },
+            {
+                "method": "GET",
+                "path": "/api/confidant-interactions",
+                "description": "Daftar interaksi Confidant; spoiler tersembunyi secara default. Gunakan ?reveal=true untuk menampilkan jawaban"
+            }
         ]
     })
+
 
 
 @app.get("/api/activities")
@@ -117,15 +177,24 @@ def activities_list():
         return error("Gagal mengambil data aktivitas.", 500)
 
 
+
 @app.get("/api/activities/<int:activity_id>")
 def activity_detail(activity_id):
     try:
-        row = fetch_one("SELECT activity_id, activity_name, category, description FROM activities WHERE activity_id = %s", (activity_id,))
+        row = fetch_one(
+            "SELECT activity_id, activity_name, category, description "
+            "FROM activities WHERE activity_id = %s",
+            (activity_id,)
+        )
+
         if not row:
             return error("Aktivitas tidak ditemukan.", 404)
+
         return jsonify({"data": row}), 200
+
     except RuntimeError as exc:
         return error(str(exc), 503)
+
     except Error:
         app.logger.exception("Could not fetch activity")
         return error("Gagal mengambil detail aktivitas.", 500)
@@ -328,6 +397,86 @@ def profiles_list():
     except Error:
         app.logger.exception("Could not list profiles")
         return error("Gagal mengambil data profil pemain.", 500)
+
+
+@app.get("/api/qa")
+def qa_list():
+    reveal = request.args.get("reveal", "false").lower() == "true"
+
+    try:
+        rows = fetch_all("""
+            SELECT
+                q.qa_id,
+                q.game_date_id,
+                q.question_type,
+                q.question_text,
+                CASE
+                    WHEN %s OR NOT q.is_spoiler
+                    THEN q.answer_text
+                    ELSE NULL
+                END AS answer_text,
+                CASE
+                    WHEN %s OR NOT q.is_spoiler
+                    THEN q.explanation
+                    ELSE NULL
+                END AS explanation,
+                q.is_spoiler
+            FROM qa_entries q
+            ORDER BY q.game_date_id, q.qa_id
+        """, (reveal, reveal))
+
+        return jsonify({
+            "data": rows,
+            "count": len(rows),
+            "spoilers_revealed": reveal
+        }), 200
+
+    except RuntimeError as exc:
+        return error(str(exc), 503)
+    except Error:
+        app.logger.exception("Could not list Q&A entries")
+        return error("Gagal mengambil data pertanyaan dan jawaban.", 500)
+
+
+@app.get("/api/confidant-interactions")
+def confidant_interactions_list():
+    reveal = request.args.get("reveal", "false").lower() == "true"
+
+    try:
+        rows = fetch_all("""
+            SELECT
+                ci.interaction_id,
+                ci.confidant_id,
+                c.confidant_name,
+                ci.rank_target,
+                ci.interaction_description,
+                CASE
+                    WHEN %s OR NOT ci.is_spoiler
+                    THEN ci.answer_text
+                    ELSE NULL
+                END AS answer_text,
+                CASE
+                    WHEN %s OR NOT ci.is_spoiler
+                    THEN ci.affection_points
+                    ELSE NULL
+                END AS affection_points,
+                ci.is_spoiler
+            FROM confidant_interactions ci
+            JOIN confidants c ON c.confidant_id = ci.confidant_id
+            ORDER BY c.confidant_name, ci.rank_target, ci.interaction_id
+        """, (reveal, reveal))
+
+        return jsonify({
+            "data": rows,
+            "count": len(rows),
+            "spoilers_revealed": reveal
+        }), 200
+
+    except RuntimeError as exc:
+        return error(str(exc), 503)
+    except Error:
+        app.logger.exception("Could not list Confidant interactions")
+        return error("Gagal mengambil data interaksi Confidant.", 500)
 
 
 @app.errorhandler(404)
