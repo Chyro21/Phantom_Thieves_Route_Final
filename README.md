@@ -4,37 +4,44 @@ Phantom Thieves Route adalah proyek REST API berbasis Python yang dirancang untu
 
 Proyek ini dikembangkan sebagai proyek pembelajaran Backend Development dengan menggunakan Python, Flask, PostgreSQL, dan deployment melalui Vercel.
 
-## Informasi Proyek
+## 1. Informasi Proyek
 
-- **Nama:** Phantom Thieves Route
+- **Nama proyek:** Phantom Thieves Route
 - **Bahasa pemrograman:** Python
 - **Framework:** Flask
 - **Database:** PostgreSQL
 - **Database hosting:** Supabase
 - **Deployment:** Vercel
-- **Format respons:** JSON
+- **Format respons API:** JSON
+- **API testing:** Thunder Client
 
-## Deployment
+## 2. Deployment dan Repository
 
-Base URL API:
+**Base URL API:**
 
 https://phantom-thieves-route-final.vercel.app/
 
-Dokumentasi API:
+**Dokumentasi API:**
 
 https://phantom-thieves-route-final.vercel.app/api/docs
 
-## Fitur API
+**Repository GitHub:**
 
-### 1. Health Check
+https://github.com/Chyro21/Phantom_Thieves_Route_Final
 
-Memeriksa status aplikasi dan koneksi database.
+Aplikasi di-deploy melalui Vercel dan menggunakan PostgreSQL yang di-host melalui Supabase.
 
-**Request**
+## 3. Fitur dan Dokumentasi API
+
+### 3.1 Health Check
+
+Endpoint ini digunakan untuk memeriksa status aplikasi dan koneksi database.
+
+**Request:**
 
 `GET /api/health`
 
-**Contoh respons**
+**Contoh respons:**
 
 ```json
 {
@@ -44,18 +51,20 @@ Memeriksa status aplikasi dan koneksi database.
 }
 ```
 
-### 2. Activities
+Respons `status: ok` menunjukkan bahwa aplikasi berjalan dan koneksi database berhasil diperiksa.
 
-Mengambil dan mengelola data aktivitas.
+### 3.2 Activities
 
-| Method | Endpoint               | Fungsi                     |
-| ------ | ---------------------- | -------------------------- |
-| GET    | `/api/activities`      | Mengambil daftar aktivitas |
-| POST   | `/api/activities`      | Menambahkan aktivitas      |
-| PATCH  | `/api/activities/{id}` | Memperbarui aktivitas      |
-| DELETE | `/api/activities/{id}` | Menghapus aktivitas        |
+Endpoint Activities digunakan untuk mengambil, menambahkan, memperbarui, dan menghapus data aktivitas.
 
-Contoh request POST:
+| Method | Endpoint               | Fungsi                               |
+| ------ | ---------------------- | ------------------------------------ |
+| GET    | `/api/activities`      | Mengambil daftar aktivitas           |
+| POST   | `/api/activities`      | Menambahkan aktivitas                |
+| PATCH  | `/api/activities/{id}` | Memperbarui aktivitas berdasarkan ID |
+| DELETE | `/api/activities/{id}` | Menghapus aktivitas berdasarkan ID   |
+
+**Contoh request POST:**
 
 ```json
 {
@@ -65,113 +74,218 @@ Contoh request POST:
 }
 ```
 
-### 3. Confidants
+Endpoint ini telah digunakan untuk menguji operasi CRUD, mulai dari menambahkan data, mengambil data, memperbarui data, hingga menghapus data.
 
-Mengambil data karakter Confidant.
+### 3.3 Confidants
+
+Endpoint ini digunakan untuk mengambil data karakter Confidant.
+
+**Request:**
 
 `GET /api/confidants`
 
-Data yang dikembalikan mencakup ID Confidant, nama karakter, Arcana, dan catatan.
+Data yang dikembalikan mencakup informasi Confidant seperti ID, nama karakter, Arcana, dan catatan sesuai data yang tersedia di database.
 
-### 4. Personas
+### 3.4 Personas
 
-Mengambil data Persona.
+Endpoint ini digunakan untuk mengambil data Persona.
+
+**Request:**
 
 `GET /api/personas`
 
-Data yang dikembalikan mencakup ID Persona, nama, Arcana, level, dan catatan.
+Data yang dikembalikan mencakup informasi Persona seperti ID, nama, Arcana, level, dan catatan sesuai data yang tersedia di database.
 
-### 5. Calendar
+### 3.5 Calendar
 
-Mengambil informasi aktivitas berdasarkan tanggal dalam game.
+Endpoint Calendar digunakan untuk mengambil informasi aktivitas berdasarkan tanggal dalam game.
+
+**Request:**
 
 `GET /api/calendar?date=2026-04-11`
 
-Parameter:
+**Parameter:**
 
-- `date`: tanggal dalam format `YYYY-MM-DD`.
+- `date`: tanggal dalam game dengan format `YYYY-MM-DD`.
 
-Informasi yang dapat ditampilkan mencakup tanggal, hari, sesi aktivitas, nama aktivitas, kategori, serta nilai perubahan social stats.
+Informasi yang dapat ditampilkan mencakup tanggal, hari, sesi aktivitas, nama aktivitas, kategori, dan nilai perubahan social stats.
 
-Pada hari Minggu, sesi kalender menggunakan Morning dan Evening, sesuai hasil pengujian yang dilakukan.
+Pada hari biasa, kalender menggunakan sesi After School dan Evening. Pada hari Minggu, sesi After School digantikan dengan Morning, sedangkan sesi Evening tetap digunakan.
 
-## Pengujian API
+### 3.6 QA dan Classroom Answers
 
-Pengujian dilakukan menggunakan Thunder Client di Visual Studio Code terhadap URL deployment Vercel.
+Endpoint QA digunakan untuk mengambil data pertanyaan dan jawaban dalam game, termasuk pertanyaan kelas.
 
-| Pengujian                              | Hasil                  |
-| -------------------------------------- | ---------------------- |
-| GET `/api/health`                      | Berhasil               |
-| GET `/api/activities`                  | Berhasil               |
-| POST `/api/activities`                 | Berhasil               |
-| GET `/api/activities` setelah POST     | Berhasil               |
-| PATCH `/api/activities/7`              | Berhasil               |
-| DELETE `/api/activities/7`             | Berhasil               |
-| GET `/api/activities/7` setelah DELETE | Mengembalikan HTTP 404 |
-| GET `/api/confidants`                  | Berhasil               |
-| GET `/api/personas`                    | Berhasil               |
-| GET `/api/calendar?date=2026-04-11`    | Berhasil               |
-| GET `/api/calendar?date=2026-04-12`    | Berhasil               |
+**Request:**
 
-## Menjalankan Proyek Secara Lokal
+`GET /api/qa`
 
-### Prasyarat
+Secara default, jawaban dan penjelasan yang ditandai sebagai spoiler disembunyikan. Untuk membuka jawaban, gunakan parameter `reveal=true`.
+
+**Menyembunyikan spoiler:**
+
+`GET /api/qa`
+
+**Membuka spoiler:**
+
+`GET /api/qa?reveal=true`
+
+Ketika spoiler disembunyikan, field `answer_text` dan `explanation` pada data yang dilindungi dikembalikan sebagai `null`. Ketika parameter `reveal=true` digunakan, jawaban dan penjelasan ditampilkan.
+
+### 3.7 Confidant Interactions
+
+Endpoint ini digunakan untuk mengambil informasi interaksi Confidant, termasuk pilihan dialog dan affection points.
+
+**Request:**
+
+`GET /api/confidant-interactions`
+
+Secara default, informasi jawaban dan affection points yang ditandai sebagai spoiler disembunyikan.
+
+**Menyembunyikan spoiler:**
+
+`GET /api/confidant-interactions`
+
+**Membuka spoiler:**
+
+`GET /api/confidant-interactions?reveal=true`
+
+Ketika spoiler disembunyikan, field `answer_text` dan `affection_points` pada data yang dilindungi dikembalikan sebagai `null`. Ketika parameter `reveal=true` digunakan, informasi tersebut ditampilkan.
+
+## 4. Pengujian API
+
+Pengujian API dilakukan menggunakan Thunder Client di Visual Studio Code terhadap aplikasi yang telah di-deploy melalui Vercel.
+
+### 4.1 Health Check dan Data
+
+| Pengujian                           | Hasil    |
+| ----------------------------------- | -------- |
+| GET `/api/health`                   | Berhasil |
+| GET `/api/activities`               | Berhasil |
+| GET `/api/confidants`               | Berhasil |
+| GET `/api/personas`                 | Berhasil |
+| GET `/api/calendar?date=2026-04-11` | Berhasil |
+| GET `/api/calendar?date=2026-04-12` | Berhasil |
+
+### 4.2 Pengujian CRUD Activities
+
+| Pengujian                              | Hasil                                  |
+| -------------------------------------- | -------------------------------------- |
+| POST `/api/activities`                 | Berhasil menambahkan aktivitas         |
+| GET `/api/activities` setelah POST     | Data aktivitas baru berhasil ditemukan |
+| PATCH `/api/activities/7`              | Berhasil memperbarui aktivitas         |
+| DELETE `/api/activities/7`             | Berhasil menghapus aktivitas           |
+| GET `/api/activities/7` setelah DELETE | Mengembalikan HTTP 404                 |
+
+Hasil tersebut menunjukkan bahwa operasi Create, Read, Update, dan Delete pada endpoint Activities telah berhasil diuji.
+
+### 4.3 Pengujian Perlindungan Spoiler
+
+| Method | Endpoint                                  | Hasil                                                  |
+| ------ | ----------------------------------------- | ------------------------------------------------------ |
+| GET    | `/api/qa`                                 | Berhasil; jawaban dan penjelasan spoiler disembunyikan |
+| GET    | `/api/qa?reveal=true`                     | Berhasil; jawaban dan penjelasan ditampilkan           |
+| GET    | `/api/confidant-interactions`             | Berhasil; jawaban dan affection points disembunyikan   |
+| GET    | `/api/confidant-interactions?reveal=true` | Berhasil; jawaban dan affection points ditampilkan     |
+
+Pada mode default, data yang ditandai sebagai spoiler memiliki nilai `null` pada field jawaban yang dilindungi. Ketika parameter `reveal=true` digunakan, field tersebut ditampilkan dan respons mengindikasikan bahwa spoiler telah dibuka.
+
+Pengujian ini menunjukkan bahwa mekanisme penyembunyian dan pengungkapan spoiler berjalan sesuai rancangan berdasarkan respons API yang diperoleh.
+
+### 4.4 Dokumentasi Endpoint
+
+Dokumentasi endpoint dapat diakses melalui:
+
+https://phantom-thieves-route-final.vercel.app/api/docs
+
+Dokumentasi tersebut menyediakan daftar endpoint API beserta metode dan deskripsi penggunaannya. Pada pemeriksaan terakhir, dokumentasi menampilkan 13 endpoint.
+
+## 5. Menjalankan Proyek Secara Lokal
+
+### 5.1 Prasyarat
+
+Perangkat yang digunakan perlu memiliki:
 
 - Python
 - pip
 - Git
-- Akun Supabase dengan database PostgreSQL
 - Visual Studio Code atau editor kode lainnya
+- Akun Supabase dengan database PostgreSQL
 
-### Instalasi
+### 5.2 Clone Repository
 
-1. Clone repository:
+Jalankan perintah berikut pada terminal:
 
-   ```bash
-   git clone https://github.com/Chyro21/Phantom_Thieves_Route_Final.git
-   ```
+```bash
+git clone https://github.com/Chyro21/Phantom_Thieves_Route_Final.git
+```
 
-2. Masuk ke folder proyek:
+### 5.3 Masuk ke Folder Proyek
 
-   ```bash
-   cd Phantom_Thieves_Route_Final
-   ```
+```bash
+cd Phantom_Thieves_Route_Final
+```
 
-3. Buat virtual environment:
+### 5.4 Membuat Virtual Environment
 
-   ```bash
-   python -m venv .venv
-   ```
+```bash
+python -m venv .venv
+```
 
-4. Aktifkan virtual environment di Windows PowerShell:
+### 5.5 Mengaktifkan Virtual Environment
 
-   ```powershell
-   .venv\Scripts\Activate.ps1
-   ```
+Untuk Windows PowerShell:
 
-5. Instal dependensi:
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 5.6 Menginstal Dependensi
 
-6. Siapkan variabel lingkungan `DATABASE_URL` menggunakan connection string PostgreSQL milikmu. Jangan mengunggah file `.env` atau membagikan password database.
+```bash
+pip install -r requirements.txt
+```
 
-7. Jalankan aplikasi sesuai entry point lokal yang tersedia di repository.
+### 5.7 Menyiapkan Database
 
-## Teknologi
+Siapkan variabel lingkungan `DATABASE_URL` menggunakan connection string PostgreSQL milik sendiri.
 
-- Python
-- Flask
-- PostgreSQL
-- Supabase
-- Vercel
-- Thunder Client
+Jika proyek menggunakan file `.env`, isi file tersebut dengan konfigurasi database lokal yang sesuai. Jangan mengunggah file `.env` atau membagikan password dan kredensial database ke repository publik.
 
-## Catatan Pengembangan
+### 5.8 Menjalankan Aplikasi
 
-Sebagian data yang digunakan dalam pengujian masih berupa data contoh (_dummy_). Pengembangan berikutnya mencakup penyempurnaan data game, integrasi tracker, kalkulator fusion Persona, serta database boss dengan perlindungan spoiler.
+Jalankan aplikasi sesuai entry point lokal dan konfigurasi yang tersedia di repository.
 
-## Repository
+## 6. Teknologi yang Digunakan
 
-https://github.com/Chyro21/Phantom_Thieves_Route_Final
+- **Python:** bahasa pemrograman untuk implementasi backend.
+- **Flask:** framework untuk membangun REST API.
+- **PostgreSQL:** sistem manajemen database relasional.
+- **Supabase:** layanan hosting PostgreSQL.
+- **Vercel:** platform deployment aplikasi.
+- **Thunder Client:** alat untuk menguji endpoint HTTP dan memeriksa respons API.
+- **Git dan GitHub:** digunakan untuk pengelolaan versi dan penyimpanan source code.
+
+## 7. Catatan Pengembangan
+
+Sebagian data yang digunakan dalam pengujian masih berupa data contoh (_dummy_). Data tersebut digunakan untuk menguji struktur respons API, operasi CRUD, serta mekanisme perlindungan spoiler.
+
+Pengembangan selanjutnya direncanakan mencakup:
+
+1. Penyempurnaan data game Persona 5 Royal.
+2. Integrasi kalender dengan Manual Tracker.
+3. Pengembangan Persona Fusion Calculator.
+4. Pengembangan database boss beserta informasi kelemahan dan perlindungan spoiler.
+5. Penyempurnaan dokumentasi dan pengujian seluruh endpoint.
+
+## 8. Kesimpulan
+
+Phantom Thieves Route merupakan proyek backend berbasis Python yang menyediakan REST API dengan database PostgreSQL. Aplikasi telah di-deploy melalui Vercel dan menyediakan endpoint untuk aktivitas, Confidant, Persona, kalender, QA, serta interaksi Confidant.
+
+Berdasarkan pengujian yang telah dilakukan, endpoint health check, operasi CRUD aktivitas, pengambilan data, dan mekanisme perlindungan spoiler telah berhasil diuji pada deployment produksi. Data yang digunakan sebagian masih berupa data contoh sehingga penyempurnaan isi data game dapat dilakukan pada tahap pengembangan berikutnya.
+
+## 9. Tautan Proyek
+
+- **GitHub Repository:** https://github.com/Chyro21/Phantom_Thieves_Route_Final
+- **Base URL API:** https://phantom-thieves-route-final.vercel.app/
+- **Dokumentasi API:** https://phantom-thieves-route-final.vercel.app/api/docs
